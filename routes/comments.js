@@ -29,7 +29,7 @@ router.post('/comments/:postId', async (req, res) => {
     }
     else {
         if (!content) {
-            return res.json({ errorMessage: "Please enter the comment content" })
+            return res.status(204).json({ errorMessage: "Please enter the comment content" })
         }
         const createdComment = await Comments.create({
             postId: postId,
@@ -38,7 +38,7 @@ router.post('/comments/:postId', async (req, res) => {
             content: content,
         });
 
-        res.json({ comments: createdComment });
+        res.status(201).json({ comments: createdComment });
     }
 });
 
@@ -47,7 +47,7 @@ router.put('/comments/:commentId', async (req, res) => {
     const { content } = req.body;
     const comment = await Comments.findOne({ commentId: commentId })
     if (!content) {
-        return res.json({ errorMessage: "Please enter the comment content" })
+        return res.status(304).json({ errorMessage: "Please enter the comment content" })
     }
     if (comment) {
         await Comments.updateOne({ commentId: commentId },
@@ -57,7 +57,7 @@ router.put('/comments/:commentId', async (req, res) => {
                 }
             })
     }
-    return res.json({
+    return res.status(200).json({
         message: 'The comment has been edited',
         success: true,
     })
@@ -69,12 +69,12 @@ router.delete('/comments/:commentId', async (req, res) => {
 
     if (comment) {
         await Comments.deleteOne({ commentId: commentId })
-        res.json({
+        res.status(200).json({
             message: 'The post has been deleted',
             success: true,
         })
     } else {
-        res.status(400).json({
+        res.status(404).json({
             errorMessage: "Data not found"
         })
     }
