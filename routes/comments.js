@@ -35,7 +35,7 @@ router.post('/comments/:postId', async (req, res) => {
     } else {
         if (!content) {
             return res.status(204).json({
-                rrorMessage: "Please enter the comment content"
+                errorMessage: "Please enter the comment content"
             })
         }
         const createdComment = await Comments.create({
