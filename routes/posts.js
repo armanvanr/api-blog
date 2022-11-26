@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Posts = require('../schemas/post');
+const { ObjectId } = require('mongodb');
 
 router.get('/posts', async (req, res) => {
     const posts = await Posts.find({}, { postId: 1, title: 1, user: 1, createdAt: 1, _id: 0 }).sort({ createdAt: -1 })
