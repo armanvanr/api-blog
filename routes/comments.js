@@ -17,19 +17,26 @@ router.get('/comments/:postId', async (req, res) => {
     res.json({ data });
 });
 
+router.get('/comments', async (req, res) => {
+    const comments = await Comments.find({}, { postId: 1, user: 1, content: 1, createdAt: 1 }).sort({ createdAt: -1 })
+
+    res.json({ data: comments })
+})
+
 router.post('/comments/:postId', async (req, res) => {
     const { postId } = req.params;
     const { commentId, user, content } = req.body;
     const comments = await Comments.find({ commentId });
-    if (comments.length > 0) {
+    if (comments.length) {
         return res.status(400).json({
             success: false,
             Error: "Comment ID must be unique!"
         });
-    }
-    else {
+    } else {
         if (!content) {
-            return res.status(204).json({ errorMessage: "Please enter the comment content" })
+            return res.status(204).json({
+                errorMessage: "Please enter the comment content"
+            })
         }
         const createdComment = await Comments.create({
             postId: postId,
@@ -46,8 +53,11 @@ router.put('/comments/:commentId', async (req, res) => {
     const { commentId } = req.params;
     const { content } = req.body;
     const comment = await Comments.findOne({ commentId: commentId })
+
     if (!content) {
-        return res.status(304).json({ errorMessage: "Please enter the comment content" })
+        return res.status(304).json({
+            errorMessage: "Please enter the comment content"
+        })
     }
     if (comment) {
         await Comments.updateOne({ commentId: commentId },
@@ -56,11 +66,11 @@ router.put('/comments/:commentId', async (req, res) => {
                     content: content
                 }
             })
+        return res.status(200).json({
+            message: 'The comment has been edited',
+            success: true,
+        })
     }
-    return res.status(200).json({
-        message: 'The comment has been edited',
-        success: true,
-    })
 })
 
 router.delete('/comments/:commentId', async (req, res) => {
