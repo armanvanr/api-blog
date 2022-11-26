@@ -2,16 +2,18 @@ const mongoose = require('mongoose');
 
 const postsSchema = new mongoose.Schema({
     postId:{
-        type: String,
+        type: Number,
+        required: true,
+        unique: true,
     },
     user:{
         type: String,
         required: true,
-        unique: true,
     },
     title:{
         type: String,
         required: true,
+        unique: true,
     },
     content:{
         type: String,

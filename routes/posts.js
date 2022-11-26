@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const Posts = require('../schemas/post');
-const { ObjectId } = require('mongodb');
 
 router.get('/posts', async (req, res) => {
     const posts = await Posts.find({}, { postId: 1, title: 1, user: 1, createdAt: 1, _id: 0 }).sort({ createdAt: -1 })
@@ -13,24 +12,30 @@ router.get('/posts', async (req, res) => {
 });
 
 router.post('/posts', async (req, res) => {
-    const { title, user, password, content } = req.body;
-    const posts = await Posts.find({ title });
-    if (posts.length > 0) {
+    const { postId, title, user, password, content } = req.body;
+    const posts = await Posts.find({ postId });
+    const checkTitle = await Posts.find({ title });
+
+    if (posts.length) {
+        return res.status(400).json({
+            success: false,
+            errorMessage: "Such ID already exists, please enter another ID"
+        });
+    } else if (checkTitle.length) {
         return res.status(400).json({
             success: false,
             errorMessage: "Such title already exists, please enter another title"
         });
+    } else {
+        const createdPost = await Posts.create({
+            postId: postId,
+            title: title,
+            user: user,
+            password: password,
+            content: content,
+        });
+        res.status(201).json({ posts: createdPost });
     }
-
-    const createdPost = await Posts.create({
-        postId: ObjectId(),
-        title: title,
-        user: user,
-        password: password,
-        content: content,
-    });
-
-    res.status(201).json({ posts: createdPost });
 });
 
 router.get('/posts/:postId', async (req, res) => {
@@ -62,6 +67,7 @@ router.put('/posts/:postId', async (req, res) => {
     const { postId } = req.params;
     const { title, content, password } = req.body;
     const posts = await Posts.find({ postId: postId });
+
     if (!title || !content) {
         res.json({ message: "Please enter any title or content to update" })
     }
@@ -69,9 +75,14 @@ router.put('/posts/:postId', async (req, res) => {
         await Posts.updateOne(
             { postId: postId },
             { $set: { title: title, content: content } });
-        res.status(200).json({ success: true, message: "The post has been updated" });
+        res.status(200).json({
+            success: true,
+            message: "The post has been updated"
+        });
     } else {
-        res.status(401).json({ errorMessage: "The password is incorrect" })
+        res.status(401).json({
+            errorMessage: "The password is incorrect"
+        });
     }
 })
 
@@ -79,13 +90,17 @@ router.delete('/posts/:postId', async (req, res) => {
     const { postId } = req.params;
     const { password } = req.body;
     const posts = await Posts.find({ postId: postId });
+
     if (posts[0].password === password) {
         await Posts.deleteOne({ postId });
-        res.status(200).json({ success: true, message: "The post has been deleted" });
+        res.status(200).json({
+            success: true, message: "The post has been deleted"
+        });
     } else {
-        res.status(401).json({ errorMessage: "The password is incorrect" })
+        res.status(401).json({
+            errorMessage: "The password is incorrect"
+        });
     }
-
 })
 
 module.exports = router;

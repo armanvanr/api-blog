@@ -9,6 +9,8 @@ connect();
 
 app.use(express.json());
 
-app.use('/api', [postRouter], [commentRouter]);
+app.use('/api', [postRouter, commentRouter]);
 
-app.listen(process.env.PORT || 5000, () => { console.log(port, 'Server is open with port!'); });
+app.listen(process.env.PORT || 5000, () => {
+    console.log(port, 'Server is open with port!');
+});
